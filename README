@@ -1,0 +1,5 @@
+This code tries to make it a bit easier to type variable_names_like_this in
+python mode. It does this by looking at the character before you type '-' to
+decide whether you really want to insert a minus '-' or an underscore '_'.
+
+You can always get the alternative choice with shift-minus.
