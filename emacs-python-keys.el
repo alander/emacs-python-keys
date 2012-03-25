@@ -37,10 +37,22 @@
 (defun my-python-minus-or-underscore-p ()
   "Decide whether it would be more appropriate to insert a minus or an underscore. 
 Return t for minus, nil for underscore."
-  (let ((previous (char-to-string (preceding-char))))
+  (let* ((previous (char-to-string (preceding-char)))
+         (point (point))
+         (prior-word (progn 
+                       (save-excursion
+                         (move-beginning-of-line 1)
+                         (let ((bol (point)))
+                           (buffer-substring-no-properties bol point))))))
+    (setq prior-word (apply 'string (reverse (string-to-list prior-word))))
+    (let ((first-space (string-match "\s" prior-word)))
+      (setq prior-word (substring prior-word 0 first-space))
+      (setq prior-word (apply 'string (reverse (string-to-list prior-word)))))
     (cond
       ((bolp) t)                         ; begining of line means probably -
       ((string-match "\\s-" previous) t) ; - after a whitespace
+      ((string-match "_+\\w+_+" prior-word) nil)
+      ((string-match "_" previous) t) ; _ after an _ (for __init, eg)
       ((string-match "[\(\[\]\)=" previous) t) ; - after paren, bracket or =
       ((string-match "\\W" previous) t) ; - after a word character (probably in a variable name)
       ((string-match "\\w" previous) nil) ; _ after a non-word character
