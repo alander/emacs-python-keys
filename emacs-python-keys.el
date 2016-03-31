@@ -50,17 +50,20 @@ Return t for minus, nil for underscore."
       (setq prior-word (apply 'string (reverse (string-to-list prior-word)))))
     (cond
       ((bolp) t)                         ; begining of line means probably -
-      ((string-match "\\s-" previous) t) ; - after a whitespace
+      ((string-match "\\s-" previous) nil) ; _ after a whitespace
       ((string-match "_+\\w+_+" prior-word) nil)
-      ((string-match "_" previous) t) ; _ after an _ (for __init, eg)
+      ((string-match "\\." previous) nil) ; _ after a .
+      ((string-match "_" previous) nil) ; _ after an _ (for __init, eg)
       ((string-match "[\(\[\]\)=" previous) t) ; - after paren, bracket or =
       ((string-match "\\W" previous) t) ; - after a word character (probably in a variable name)
       ((string-match "\\w" previous) nil) ; _ after a non-word character
+      ((string-match "\\d\." prior-word) t)
       (t t))))
 
 (defun my-python-minus-key ()
   "Insert a minus or underscore as appropriate to make it easy to type variable_names_like_this in Python."
   (interactive)
+  ;; (insert ?_))
   (if (my-python-minus-or-underscore-p)
       (insert ?-)
       (insert ?_)))
@@ -68,6 +71,7 @@ Return t for minus, nil for underscore."
 (defun my-python-underscore-key ()
   "Do the opposite of my-python-minus-key - that is insert a minus if it would insert an underscore and vv."
   (interactive)
+  ;; (insert ?-))
   (if (my-python-minus-or-underscore-p)
       (insert ?_)
       (insert ?-)))
@@ -75,5 +79,10 @@ Return t for minus, nil for underscore."
 (add-hook 'python-mode-hook '(lambda () 
                               (define-key python-mode-map (kbd "-") 'my-python-minus-key)
                               (define-key python-mode-map (kbd "_") 'my-python-underscore-key)))
+
+(add-hook 'inferior-python-mode-hook '(lambda () 
+                              (define-key inferior-python-mode-map (kbd "-") 'my-python-minus-key)
+                              (define-key inferior-python-mode-map (kbd "_") 'my-python-underscore-key)))
+
 
 (provide 'emacs-python-keys)
